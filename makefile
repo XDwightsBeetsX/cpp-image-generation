@@ -1,16 +1,9 @@
 # compiles the files into bitmap.exe
-all: FileInfo bitmap main  # compilation step names
-	g++ main.o bitmap.o FileInfo.o -o bitmap.exe
+all: main  # compilation step names
+	g++ main.o -o bitmap.exe
 
-main: main.cpp bitmap.h FileInfo.h
+main: main.cpp
 	g++ -c main.cpp
-	
-bitmap: bitmap.cpp bitmap.h FileInfo.h
-	g++ -c bitmap.cpp
-
-FileInfo: FileInfo.cpp FileInfo.h
-	g++ -c FileInfo.cpp
-
 
 # removes compiled files and the executable
 wipe:
@@ -25,5 +18,5 @@ clean:
 
 
 # quick way to run the program via make
-run: bitmap
+run:
 	./bitmap.exe
