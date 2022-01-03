@@ -6,5 +6,8 @@
 # Executables
 *.exe
 
+# dont push generated imgs to git
+*.bmp
+
 # Environments
 .vscode

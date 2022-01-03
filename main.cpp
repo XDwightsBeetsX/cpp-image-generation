@@ -4,69 +4,55 @@
 using namespace std;
 
 
-// BMP vars
-const int BYTES_PER_PIXEL = 3; /// red, green, & blue
-const int FILE_HEADER_SIZE = 14;
-const int INFO_HEADER_SIZE = 40;
+int main() {
+    cout << "running..." << endl << endl;
 
+    // file paras
+    char* filename = (char*) "output.bmp";
+    const int height = 100;
+    const int width = 100;
 
-// Helper Methods
-void generateBitmapImage(unsigned char* image, int height, int width, char* imageFileName);
-unsigned char* createBitmapFileHeader(int height, int stride);
-unsigned char* createBitmapInfoHeader(int height, int width);
+    // red, green, blue
+    const int BYTES_PER_PIXEL = 3;
 
-void generateBitmapImage (unsigned char* image, int height, int width, char* imageFileName)
-{
-    int widthInBytes = width * BYTES_PER_PIXEL;
+    const int FILE_HEADER_SIZE = 14;
+    const int INFO_HEADER_SIZE = 40;
+
+    const int rowWidthInBytes = BYTES_PER_PIXEL * width;
 
     unsigned char padding[3] = {0, 0, 0};
-    int paddingSize = (4 - (widthInBytes) % 4) % 4;
+    const int paddingSize = (4 - (rowWidthInBytes) % 4) % 4;
 
-    int stride = (widthInBytes) + paddingSize;
+    const int headerSize = FILE_HEADER_SIZE + INFO_HEADER_SIZE;
+    const int stride = rowWidthInBytes + paddingSize;
+    const int dataSize = stride * height;
+    const int fileSize = headerSize + dataSize;
 
-    FILE* imageFile = fopen(imageFileName, "wb");
+    cout << "fname:     " << filename << endl;
+    cout << "width:     " << width << endl;
+    cout << "height:    " << height << endl;
+    cout << "file size: " << fileSize << endl << endl;
 
-    unsigned char* fileHeader = createBitmapFileHeader(height, stride);
-    fwrite(fileHeader, 1, FILE_HEADER_SIZE, imageFile);
-
-    unsigned char* infoHeader = createBitmapInfoHeader(height, width);
-    fwrite(infoHeader, 1, INFO_HEADER_SIZE, imageFile);
-
-    int i;
-    for (i = 0; i < height; i++) {
-        fwrite(image + (i*widthInBytes), BYTES_PER_PIXEL, width, imageFile);
-        fwrite(padding, 1, paddingSize, imageFile);
-    }
-
-    fclose(imageFile);
-}
-
-unsigned char* createBitmapFileHeader (int height, int stride)
-{
-    int fileSize = FILE_HEADER_SIZE + INFO_HEADER_SIZE + (stride * height);
-
+    // fileHeader
     static unsigned char fileHeader[] = {
-        0,0,     /// signature
-        0,0,0,0, /// image file size in bytes
-        0,0,0,0, /// reserved
-        0,0,0,0, /// start of pixel array
+        0,0,        // signature must be 'BM'
+        0,0,0,0,    // image file size in bytes
+        0,0,0,0,    // reserved (all 0)
+        0,0,0,0,    // start of pixel array
     };
 
     fileHeader[ 0] = (unsigned char)('B');
     fileHeader[ 1] = (unsigned char)('M');
-    fileHeader[ 2] = (unsigned char)(fileSize      );
-    fileHeader[ 3] = (unsigned char)(fileSize >>  8);
+    fileHeader[ 2] = (unsigned char)(fileSize);
+    fileHeader[ 3] = (unsigned char)(fileSize >>  8);   
     fileHeader[ 4] = (unsigned char)(fileSize >> 16);
     fileHeader[ 5] = (unsigned char)(fileSize >> 24);
-    fileHeader[10] = (unsigned char)(FILE_HEADER_SIZE + INFO_HEADER_SIZE);
+    fileHeader[10] = (unsigned char)(headerSize);
+    
 
-    return fileHeader;
-}
-
-unsigned char* createBitmapInfoHeader (int height, int width)
-{
+    // infoHeader
     static unsigned char infoHeader[] = {
-        0,0,0,0, /// header size
+        0,0,0,0, /// infoHeader size
         0,0,0,0, /// image width
         0,0,0,0, /// image height
         0,0,     /// number of color planes
@@ -80,10 +66,10 @@ unsigned char* createBitmapInfoHeader (int height, int width)
     };
 
     infoHeader[ 0] = (unsigned char)(INFO_HEADER_SIZE);
-    infoHeader[ 4] = (unsigned char)(width      );
-    infoHeader[ 5] = (unsigned char)(width >>  8);
-    infoHeader[ 6] = (unsigned char)(width >> 16);
-    infoHeader[ 7] = (unsigned char)(width >> 24);
+    infoHeader[ 4] = (unsigned char)(width       );
+    infoHeader[ 5] = (unsigned char)(width  >>  8);
+    infoHeader[ 6] = (unsigned char)(width  >> 16);
+    infoHeader[ 7] = (unsigned char)(width  >> 24);
     infoHeader[ 8] = (unsigned char)(height      );
     infoHeader[ 9] = (unsigned char)(height >>  8);
     infoHeader[10] = (unsigned char)(height >> 16);
@@ -91,54 +77,58 @@ unsigned char* createBitmapInfoHeader (int height, int width)
     infoHeader[12] = (unsigned char)(1);
     infoHeader[14] = (unsigned char)(BYTES_PER_PIXEL*8);
 
-    return infoHeader;
-}
 
-
-// main
-int main ()
-{
-    cout << "running 'bitmap.exe'..." << endl;
-    const int height = 300;
-    const int width = 300;
-    char* imageFileName = (char*) "bitmapImage.bmp";
-
-    unsigned char image[height][width][BYTES_PER_PIXEL];    // [B, G, R]
+    // write RGB data
+    unsigned char image[height][width][BYTES_PER_PIXEL];    // [R, G, B]
     
     for (int row = 0; row < height; row++) {
-        bool isBottom = row < (int) height / 2;
+        bool isBottom = row < (height / 2);
 
         for (int col = 0; col < width; col++) {    
-            bool isLeft = col < (int) width / 2;
-
-            // TOP LEFT
-            if (!isBottom && isLeft) {
+            if (isBottom) {
+                image[row][col][0] = (unsigned char) 0;
+                image[row][col][1] = (unsigned char) 0;
                 image[row][col][2] = (unsigned char) 255;
-                image[row][col][1] = (unsigned char) 0;
-                image[row][col][0] = (unsigned char) 0;
             }
-            // TOP RIGHT
-            else if (!isBottom && !isLeft) {
-                image[row][col][2] = (unsigned char) 0;
-                image[row][col][1] = (unsigned char) 255;
-                image[row][col][0] = (unsigned char) 0;
-            }
-            // BOTTOM LEFT
-            else if (isBottom && isLeft) {
-                image[row][col][2] = (unsigned char) 0;
-                image[row][col][1] = (unsigned char) 0;
-                image[row][col][0] = (unsigned char) 255;
-            }
-            // BOTTOM RIGHT
             else {
-                image[row][col][2] = (unsigned char) (255);
-                image[row][col][1] = (unsigned char) (238);
-                image[row][col][0] = (unsigned char) (147);
+                image[row][col][0] = (unsigned char) 0;
+                image[row][col][1] = (unsigned char) 255;
+                image[row][col][2] = (unsigned char) 0;
             }
         }
     }
 
-    generateBitmapImage((unsigned char*) image, height, width, imageFileName);
+
+    // write to file
+    FILE* imageFile = fopen(filename, "wb");
+
+    cout << "writing headers..." << endl;
+    fwrite(fileHeader, 1, FILE_HEADER_SIZE, imageFile);
+    fwrite(infoHeader, 1, INFO_HEADER_SIZE, imageFile);
+    cout << "done." << endl;
+
+    cout << "writing data..." << endl;
+    for (int row = 0; row < height; row++) {
+        cout << endl << "row " << row << endl;
+
+        for (int col = 0; col < width; col++) {
+            int r = (int) image[row][col][0];
+            int g = (int) image[row][col][1];
+            int b = (int) image[row][col][2];
+
+            cout << "(" << r << "," << g << "," << b << ") ";
+        }
+        cout << endl;
+
+        fwrite(image + (row * rowWidthInBytes), BYTES_PER_PIXEL, width, imageFile);
+        fwrite(padding, 1, paddingSize, imageFile);
+    }
+    cout << "done." << endl;
+
+    cout << "saving..." << endl;
+    fclose(imageFile);
+    cout << "done." << endl;
     
-    cout << "image generated at ./" << imageFileName << endl;
+    cout << "image generated at ./" << filename << endl;
+    return 0;
 }
