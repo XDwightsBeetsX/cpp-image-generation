@@ -14,8 +14,8 @@ int main () {
 
     // Image Parameters
     char* imageFileName = (char*) "output.bmp";
-    const int height = 5;
-    const int width = 5;
+    const int height = 300;
+    const int width = 700;
     unsigned char imgChar[height][width][BYTES_PER_PIXEL];  // [B, G, R]
 
 
@@ -24,9 +24,8 @@ int main () {
     
     
     // Perform img operations
-    white(imgVect, height, width);
-    black(imgVect, height, width);
-    invert(imgVect, height, width);
+    gradient(imgVect, height, width);
+    // normalize(imgVect, height, width);
 
 
     // populate the imgChar with the imgVect
@@ -38,10 +37,7 @@ int main () {
         }
     }
     
-    // Perform operations
-    // black((unsigned char*) image, height, width);
-
-    
+        
     // creates the file and info headers, then writes the image data
     generateBitmapImage((unsigned char*) imgChar, height, width, imageFileName);
     

@@ -6,11 +6,14 @@
 
 void black(std::vector<std::vector<std::vector<int>>>& img, int height, int width);
 
-
 void white(std::vector<std::vector<std::vector<int>>>& img, int height, int width);
+
+void gradient(std::vector<std::vector<std::vector<int>>>& img, int height, int width);
 
 
 void invert(std::vector<std::vector<std::vector<int>>>& img, int height, int width);
+
+void normalize(std::vector<std::vector<std::vector<int>>>& img, int height, int width);
 
 
 #endif

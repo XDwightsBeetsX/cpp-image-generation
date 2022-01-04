@@ -13,9 +13,9 @@ Programs to make bmp image files using c++
 
 | | |
 | :-- | :-- |
-| download (online) | [link](https://github.com/XDwightsBeetsX/cpp-image-generation) |
-| download (git) | `git clone https://github.com/XDwightsBeetsX/cpp-image-generation.git` |
-| `make all` | Compiles the executable file |
+| download (online) | <https://github.com/XDwightsBeetsX/cpp-image-generation> |
+| download (git) | `git clone https://github.com/XDwightsBeetsX/cpp-image-generation` |
+| `make all` | Compiles the object files and generates an executable |
 | `make run` | Runs the program, generating the BMP image |
 | `make clean` | Removes unneeded object files |
 | `make wipe` | Removes all generated files (including *.exe*) |
@@ -35,8 +35,10 @@ Code can also be compiled and run manually with `g++` compilers
 
 ![gradient](./imgs/gradient.bmp)
 
+![blended](./imgs/blend.bmp)
+
 ### Squares
 
-| | |
+| ![white](imgs/white.bmp) | ![white](imgs/black.bmp) |
 | :-: | :-: |
 | ![squares](./imgs/squares.bmp) | ![noisy](./imgs/squares_random.bmp) |
