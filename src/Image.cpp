@@ -77,6 +77,8 @@ void Image::toGrayscale() {
         for (int col = 0; col < Width; col++) {
             int gray = (int) (0.114 * Data[row][col][0] + 0.587 * Data[row][col][1] + 0.299 * Data[row][col][2]);
             Data[row][col][0] = gray;
+            Data[row][col][1] = 0;
+            Data[row][col][2] = 0;
         }
     }
     BytesPerPixel = 1;

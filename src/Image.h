@@ -63,7 +63,8 @@ public:
     void invert();
 
     /**
-     * @brief overwrites the first byte of each pixel with a calculated gray value.
+     * @brief Overwrites the 1st byte of each pixel with a calculated gray value.
+     * Also overwrites the 2nd and 3rd bytes with 0s.
      * NOTE: Sets the Image.BytesPerPixel to 1.
      */
     void toGrayscale();
