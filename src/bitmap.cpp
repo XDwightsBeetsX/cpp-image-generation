@@ -6,14 +6,13 @@
 using namespace std;
 
 
-const int BYTES_PER_PIXEL = 3;  // 3. loc in src/bitmap.cpp (R, G, B)
 const int FILE_HEADER_SIZE = 14;
 const int INFO_HEADER_SIZE = 40;
 
 
-void generateBitmapImage (unsigned char* image, int height, int width, char* imageFileName) {
+void generateBitmapImage (unsigned char* image, int height, int width, const char* imageFileName, int bytesPerPixel) {
     string filePrefix = "[PROGRAM] - [FILE] - ";
-    int widthInBytes = width * BYTES_PER_PIXEL;
+    int widthInBytes = width * bytesPerPixel;
 
     unsigned char padding[3] = {0, 0, 0};
     int paddingSize = (4 - (widthInBytes) % 4) % 4;
@@ -29,14 +28,14 @@ void generateBitmapImage (unsigned char* image, int height, int width, char* ima
 
     // INFO HEADER
     cout << filePrefix << "writing InfoHeader..." << endl;
-    unsigned char* infoHeader = createBitmapInfoHeader(height, width);
+    unsigned char* infoHeader = createBitmapInfoHeader(height, width, bytesPerPixel);
     fwrite(infoHeader, 1, INFO_HEADER_SIZE, imageFile);
 
     // BMP IMAGE DATA
     cout << filePrefix << "writing image data..." << endl;
     int i;
     for (i = 0; i < height; i++) {
-        fwrite(image + (i*widthInBytes), BYTES_PER_PIXEL, width, imageFile);
+        fwrite(image + (i*widthInBytes), bytesPerPixel, width, imageFile);
         fwrite(padding, 1, paddingSize, imageFile);
     }
 
@@ -67,7 +66,7 @@ unsigned char* createBitmapFileHeader (int height, int stride) {
 }
 
 
-unsigned char* createBitmapInfoHeader (int height, int width) {
+unsigned char* createBitmapInfoHeader (int height, int width, int bytesPerPixel) {
     static unsigned char infoHeader[] = {
         0,0,0,0, /// header size
         0,0,0,0, /// image width
@@ -92,7 +91,9 @@ unsigned char* createBitmapInfoHeader (int height, int width) {
     infoHeader[10] = (unsigned char)(height >> 16);
     infoHeader[11] = (unsigned char)(height >> 24);
     infoHeader[12] = (unsigned char)(1);
-    infoHeader[14] = (unsigned char)(BYTES_PER_PIXEL*8);
+    infoHeader[14] = (unsigned char)(bytesPerPixel*8);
 
     return infoHeader;
 }
+
+

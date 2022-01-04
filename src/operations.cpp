@@ -1,6 +1,5 @@
 
 #include <iostream>
-#include <vector>
 
 #include "operations.h"
 
@@ -49,7 +48,6 @@ void invert(vector<vector<vector<int>>>& img, int height, int width) {
     }
 }
 
-
 void normalize(vector<vector<vector<int>>>& img, int height, int width) {
     // preset min/maxs to be overridden
     int minB, maxB = img[0][0][0];
@@ -87,3 +85,16 @@ void normalize(vector<vector<vector<int>>>& img, int height, int width) {
         }
     }
 }
+
+vector<vector<int>> getAsGrayscale(std::vector<std::vector<std::vector<int>>>& img, int height, int width) {
+    vector<vector<int>> grayScale(height, vector<int>(width));
+    for (int row = 0; row < height; row++) {
+        for (int col = 0; col < width; col++) {
+            int gray = (int) (0.114 * img[row][col][0] + 0.587 * img[row][col][1] + 0.299 * img[row][col][2]);
+            grayScale[row][col] = gray;
+        }
+    }
+
+    return grayScale;
+}
+

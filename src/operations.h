@@ -15,5 +15,7 @@ void invert(std::vector<std::vector<std::vector<int>>>& img, int height, int wid
 
 void normalize(std::vector<std::vector<std::vector<int>>>& img, int height, int width);
 
+std::vector<std::vector<int>> getAsGrayscale(std::vector<std::vector<std::vector<int>>>& img, int height, int width);
+
 
 #endif
