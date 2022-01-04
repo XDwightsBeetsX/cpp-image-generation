@@ -27,13 +27,12 @@ class Image {
 public:
     // =========================== constructors ===========================
     /**
-     * Creates a [100 x 100] Image w/ filename="output.bmp" and pixels (r=0, g=0, b=0)
+     * @brief Creates a [100 x 100] Image w/ filename="output.bmp" and pixels (r=0, g=0, b=0).
      */
     Image();
 
-
     /**
-     * Creates a [height x width] Image w/ pixels (r=0, g=0, b=0)
+     * @brief Creates a [height x width] Image w/ pixels (r=0, g=0, b=0).
      * @param height the height of the Image in pixels
      * @param width the width of the Image in pixels
      * @param filename optionally, choose a filename for the image. 'output.bmp' by default
@@ -43,24 +42,46 @@ public:
 
     // ============================ operations ============================
     /**
-     * Fills the Image.Data with (r=255, g=255, b=255).
+     * @brief Fills the Image.Data with (r=255, g=255, b=255).
      */
     void toWhite();
 
     /**
-     * Fills the Image.Data with (r=0, g=0, b=0).
+     * @brief Fills the Image.Data with (r=0, g=0, b=0).
      */
     void toBlack();
+
+    /**
+     * @brief generates an RGB gradient in the Image.Data.
+     * NOTE: ensure Image.Data is in (R,G,B) form.
+     */
+    void gradient();
+
+    /**
+     * @brief inverts the Image.Data. Performs 255 - Image.Data.pixel for each pixel.
+     */
+    void invert();
+
+    /**
+     * @brief overwrites the first byte of each pixel with a calculated gray value.
+     * NOTE: Sets the Image.BytesPerPixel to 1.
+     */
+    void toGrayscale();
+
+    /**
+     * @brief normalizes all R,G,B values based on Min/Maxs
+     */
+    void normalize();
 
 
     // ============================== output ==============================
     /**
-     * Prints out the Image.Data in matrix form where every pixel is given by (r, g, b).
+     * @brief Prints out the Image.Data in matrix form where every pixel is given by (r, g, b).
      */
     void showData();
 
     /**
-     * Writes the .bmp fileHeader, infoHeader, and the Image.Data to file.
+     * @brief Writes the .bmp fileHeader, infoHeader, and the Image.Data to file.
      */
     void writeToFile();
 };

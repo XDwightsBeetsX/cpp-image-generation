@@ -3,17 +3,11 @@
 # 2. Compile main.cpp
 # 3. Link the compiled object files
 
-all: Image operations bitmap main
+all: Image main
 	g++ bin/*.o -o bin/main.exe
 
 Image:
 	g++ src/Image.cpp -c -o bin/Image.o
-
-operations:
-	g++ src/operations.cpp -c -o bin/operations.o
-
-bitmap:
-	g++ src/bitmap.cpp -c -o bin/bitmap.o
 
 main: main.cpp
 	g++ main.cpp -c -o bin/main.o

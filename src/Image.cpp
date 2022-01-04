@@ -52,6 +52,73 @@ void Image::toBlack() {
     }
 }
 
+void Image::gradient() {
+    for (int row = 0; row < Height; row++) {
+        for (int col = 0; col < Width; col++) {
+            Data[row][col][0] = (int) (255 * (double) (Width - col) / Width);
+            Data[row][col][1] = (int) (255 * (double) (Height - row) / Height);
+            Data[row][col][2] = (int) (255 * (double) (row + col) / (Width + Height));
+        }
+    }
+}
+
+void Image::invert() {
+    for (int row = 0; row < Height; row++) {
+        for (int col = 0; col < Width; col++) {
+            for (int i = 0; i < BytesPerPixel; i++) {
+                Data[row][col][i] = 255 - Data[row][col][i];
+            }
+        }
+    }
+}
+
+void Image::toGrayscale() {
+    for (int row = 0; row < Height; row++) {
+        for (int col = 0; col < Width; col++) {
+            int gray = (int) (0.114 * Data[row][col][0] + 0.587 * Data[row][col][1] + 0.299 * Data[row][col][2]);
+            Data[row][col][0] = gray;
+        }
+    }
+    BytesPerPixel = 1;
+}
+
+void Image::normalize() {
+    // preset min/maxs to be overridden
+    int minB, maxB = Data[0][0][0];
+    int minG, maxG = Data[0][0][1];
+    int minR, maxR = Data[0][0][2];
+
+    // find min/maxs
+    for (int row = 0; row < Height; row++) {
+        for (int col = 0; col < Width; col++) {
+            int b = Data[row][col][0];
+            int g = Data[row][col][1];
+            int r = Data[row][col][2];
+
+            if (b < minB)
+                minB = b;
+            if (maxB < b)
+                maxB = b;
+            if (g < minG)
+                minG = g;
+            if (maxG < g)
+                maxG = g;
+            if (r < minR)
+                minR = r;
+            if (maxR < r)
+                maxR = r;
+        }
+    }
+
+    // multiple vals by the spread (cast to ints)
+    for (int row = 0; row < Height; row++) {
+        for (int col = 0; col < Width; col++) {
+            Data[row][col][0] = (int) (Data[row][col][0] * (double) ((maxB - minB) / 255));
+            Data[row][col][1] = (int) (Data[row][col][1] * (double) ((maxG - minG) / 255));
+            Data[row][col][2] = (int) (Data[row][col][2] * (double) ((maxR - minR) / 255));
+        }
+    }
+}
 
 // ============================== output ==============================
 void Image::showData() {
@@ -146,5 +213,5 @@ void Image::writeToFile() {
     }
 
     fclose(file);
-    cout << "done." << endl;
+    cout << cProgram << cFile << "done." << endl;
 }

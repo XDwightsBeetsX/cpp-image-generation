@@ -1,12 +1,11 @@
-#include "./src/operations.h"
-#include "./src/bitmap.h"
-#include "./src/Image.h"
 
+#include "./src/Image.h"
 
 using namespace std;
 
-
 int main () {
-    Image I = Image();
+    char* fname = (char*) "output.bmp";
+    Image I = Image(400, 800, fname);
+    I.gradient();
     I.writeToFile();
 }
