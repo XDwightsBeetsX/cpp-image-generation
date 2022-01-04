@@ -1,21 +1,34 @@
-# compiles the files into bitmap.exe
-all: main  # compilation step names
-	g++ main.o -o bitmap.exe
+# Compiles the files into an executable in stages
+# 1. Compile user methods/classes (use -c)
+# 2. Compile main.cpp
+# 3. Link the compiled object files
+
+all: operations bitmap main
+	g++ bin/main.o bin/bitmap.o bin/operations.o -o bin/main.exe
+
+operations:
+	g++ src/operations.cpp -c -o bin/operations.o
+
+bitmap:
+	g++ src/bitmap.cpp -c -o bin/bitmap.o
 
 main: main.cpp
-	g++ -c main.cpp -o main.o
+	g++ main.cpp -c -o bin/main.o
+
 
 # removes only the compiled files
 clean:
-	rm *.o
+	rm bin/*.o
 	echo "removed all object files. (executable remains)"
+
 
 # removes compiled files and the executable
 wipe:
 	make clean
-	rm *.exe
+	rm bin/*.exe
 	echo "removed all object files and executable"
+
 
 # quick way to run the program via make
 run:
-	./bitmap.exe
+	./bin/main.exe
