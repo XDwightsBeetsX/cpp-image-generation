@@ -2,7 +2,7 @@
 bin/*
 
 # dont push generated imgs to git
-*.bmp
+output/*.bmp
 
 # Environments
 .vscode
