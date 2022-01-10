@@ -5,40 +5,45 @@ Programs to make bmp image files using c++
 - [cpp-image-generation](#cpp-image-generation)
   - [Usage](#usage)
   - [Credit](#credit)
-  - [Images](#images)
-    - [Gradient](#gradient)
+  - [Samples](#samples)
+    - [Gradients](#gradients)
     - [Squares](#squares)
 
-## Usage
+## [Usage](docs/docs.md)
 
-| | |
-| :-- | :-- |
-| download (online) | <https://github.com/XDwightsBeetsX/cpp-image-generation> |
-| download (git) | `git clone https://github.com/XDwightsBeetsX/cpp-image-generation` |
-| `make all` | Compiles the object files and generates an executable |
-| `make run` | Runs the program, generating the BMP image |
-| `make clean` | Removes unneeded object files |
-| `make wipe` | Removes all generated files (including *.exe*) |
+1. Download Code [online](https://github.com/XDwightsBeetsX/cpp-image-generation) or from git:
 
-Distributions of *Make* can be found at [**sourceforge**](http://gnuwin32.sourceforge.net/packages/make.htm) or through [**MinGW**](https://www.mingw-w64.org/downloads/)
+    ```shell
+    > git clone https://github.com/XDwightsBeetsX/cpp-image-generation
+    ```
 
-Code can also be compiled and run manually with `g++` compilers
+2. Modify `./main.cpp` or create your own
+3. Generate the executable with `make all`
+4. Run the program with `make run`
+
+> Distributions of *Make* can be found at [**sourceforge**](http://gnuwin32.sourceforge.net/packages/make.htm) or through [**MinGW**](https://www.mingw-w64.org/downloads/). See the full list of *Make* commands [here](docs/make.md). Code can also be compiled and run manually with `g++/c++` compilers.
 
 ## Credit
 
-- Thanks to [Mihas Kamal's](https://stackoverflow.com/users/4684058/minhas-kamal) stackoverflow response [here.](https://stackoverflow.com/questions/2654480/writing-bmp-image-in-pure-c-c-without-other-libraries)
+- Thanks to Mihas Kamal's stackoverflow [post](https://stackoverflow.com/questions/2654480/writing-bmp-image-in-pure-c-c-without-other-libraries)
 - Refereced the BMP image file format [here](https://web.archive.org/web/20080912171714/http://www.fortunecity.com/skyscraper/windows/364/bmpffrmt.html)
+  - A quick note on the BMP file format headers can be found [here](docs/bmp.md)
 
-## Images
+## Samples
 
-### Gradient
+### Gradients
 
-![gradient](./imgs/gradient.bmp)
-
-![blended](./imgs/blend.bmp)
+| Description | Img |
+| :-: | :-: |
+| `Image.toGradient()` | ![blended](./img/blend.bmp) |
+| Red/Green Gradient | ![gradient](./img/gradient.bmp) |
 
 ### Squares
 
-| ![white](imgs/white.bmp) | ![white](imgs/black.bmp) |
+| Description | Img |
 | :-: | :-: |
-| ![squares](./imgs/squares.bmp) | ![noisy](./imgs/squares_random.bmp) |
+| `Image.toWhite()` | ![white](img/white.bmp) |
+| `Image.toBlack()` | ![black](img/black.bmp) |
+| Tiled Squares | ![squares](./img/squares.bmp) |
+| Tiled Squares w/ random noise | ![noisy](./img/squares_random.bmp) |
+| `Image.toGradient(); Image.toGrid(2, 2, 10);` | ![gradient_grid](img/gradient_grid.bmp) |

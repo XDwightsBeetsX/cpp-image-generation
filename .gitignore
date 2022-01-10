@@ -4,5 +4,12 @@ bin/*
 # dont push generated imgs to git
 output/*.bmp
 
+# I/O
+input
+output
+
+# tests
+test
+
 # Environments
 .vscode

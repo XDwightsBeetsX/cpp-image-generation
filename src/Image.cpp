@@ -1,6 +1,8 @@
 #include <string>
 #include <cstring>
 #include <cmath>
+#include <stdexcept>
+#include <fstream>
 
 #include "Image.h"
 
@@ -10,8 +12,8 @@ using namespace std;
 
 // =========================== constructors ===========================
 Image::Image() {
-    Width = 10;
-    Height = 10;
+    Width = 100;
+    Height = 100;
     Filename = (char*) "output/output.bmp";
     
     int bpp = 3;
@@ -31,6 +33,23 @@ Image::Image(int height, int width, const char* filename) {
     Data = vector<vector<vector<int>>>(height, vector<vector<int>>(width, vector<int>(bpp, 0)));
 }
 
+Image Image::getImageFromFile(const char* filename) {
+    ifstream File(filename);
+
+    if (File.is_open()) {
+        char line;
+        while (File >> line) {
+            cout << line << endl;
+        }
+
+        File.close();
+    }
+    else {
+        cerr << "[ERROR] - Encountered error reading the file at '" << filename << "'" << endl;
+    }
+
+    return Image();
+}
 
 // ============================ operations ============================
 void Image::toWhite() {
@@ -53,7 +72,7 @@ void Image::toBlack() {
     }
 }
 
-void Image::gradient() {
+void Image::toGradient() {
     cout << cProgram << "generating gradient..." << endl;
     for (int row = 0; row < Height; row++) {
         for (int col = 0; col < Width; col++) {
@@ -64,24 +83,29 @@ void Image::gradient() {
     }
 }
 
-void Image::toGrid(int nrows, int ncols) {
-    int lineHeight = floor(0.05 * Height / (nrows - 1));
-    int lineWidth = floor(0.05 * Width / (ncols - 1));
+void Image::toGrid(int nrows, int ncols, int lineThickness) {
+    cout << cProgram << "generating " << nrows << "x" << ncols << " grid..." << endl;
 
-    int rowHeight = ceil(Height / nrows);
-    int colWidth = ceil(Width / ncols);
+    int rowHeight = floor((Height-(nrows-1)*lineThickness) / nrows);
+    int colWidth = floor((Width-(ncols-1)*lineThickness) / ncols);
 
-    for (int row = 0; row < Height; row++) {
-        for (int col = 0; col < Width; col++) {
-            // is a horizontal gridline
-            if (row % rowHeight < lineHeight) {
-                setPixel(row, col, 0, 0, 0);
-            }
+    // set rows
+    for (int gridRow = 1; gridRow < nrows; gridRow++) {
+        int h = gridRow * (rowHeight + lineThickness);
+        for (int rowToSet = h-lineThickness; rowToSet < h; rowToSet++) {
+            // set line pixels in rowToSet
+            for (int col = 0; col < Width; col++)
+                setPixel(rowToSet, col, 0, 0, 0);
+        }
+    }
 
-            // is a vertical gridline
-            if (col % colWidth < lineWidth) {
-                setPixel(row, col, 0, 0, 0);
-            }
+    // set cols
+    for (int gridCol = 1; gridCol < ncols; gridCol++) {
+        int w = gridCol * (colWidth + lineThickness);
+        for (int colToSet = w-lineThickness; colToSet < w; colToSet++) {
+            // set line pixels in colToSet 
+            for (int row = 0; row < Height; row++)
+                setPixel(row, colToSet, 0, 0, 0);
         }
     }
 }
@@ -159,179 +183,104 @@ void Image::normalize() {
 
 void Image::sobel(int T) {
     cout << cProgram << "performing sobel edge detection..." << endl;
+    sobelX(T);
+    sobelY(T);
+}
 
-    // Sobel masks in X and Y
-    const int Mx[3][3] =    {{-1, 0, 1},
-                             {-2, 0, 2},
-                             {-1, 0, 1}};
-    const int My[3][3] =    {{-1,-2,-1},
-                             { 0, 0, 0},
-                             { 1, 2, 1}};
+void Image::sobelX(int T) {
+    const int Mx[3][3]= {{-1, 0, 1},
+                         {-2, 0, 2},
+                         {-1, 0, 1}};
     
-    // Calculate the mask values for each pixel
     for (int row = 0; row < Height; row++) {
         for (int col = 0; col < Width; col++) {
-            // Select current pixel and reset gradX and gradY
-            int curr = Data[row][col][0];
-            int gradX = 0;
-            int gradY = 0;
-            
-            // top l/r, edge
-            if (row == 0) {
-                // left
-                if (col == 0) {
-                    int xTot =  Data[row  ][col  ][0] * 0.7 +
-                                Data[row+1][col+1][0] * 0.3 -
-                                curr;
-                    int yTot =  Data[row+1][col  ][0] * 0.7 +
-                                Data[row+1][col+1][0] * 0.3 -
-                                curr;
+            // gradient sum
+            int sum = 0;
 
-                    if (T <= abs(xTot) || T <= abs(yTot))
-                        invertPixel(row, col);
+            // Left edge. Won't balance with typical masks.
+            if (col == 0) {
+                // Top left corner
+                if (row == 0) {
+                    sum = Data[row  ][col+1][0] * Mx[1][2] +
+                          Data[row+1][col+1][0] * Mx[2][2] -
+                          Data[row  ][col  ][0];
                 }
-                
-                // right
-                else if (col == Width-1) {
-                    int xTot =  Data[row  ][col-1][0] * 0.7 +
-                                Data[row+1][col  ][0] * 0.3 -
-                                curr;
-                    int yTot =  Data[row+1][col-1][0] * 0.7 +
-                                Data[row+1][col  ][0] * 0.3 -
-                                curr;
-
-                    if (T <= abs(xTot) || T <= abs(yTot))
-                        invertPixel(row, col);
+                // Bottom left corner
+                else if (row == Height-1) {
+                    sum = Data[row-1][col+1][0] * Mx[0][2] +
+                          Data[row  ][col+1][0] * Mx[1][2] -
+                          Data[row  ][col  ][0];
                 }
-
-                // top edge
+                // Left edge
                 else {
-                    // Xs balance out
-                    int xTot =  Data[row  ][col-1][0] * Mx[1][0] +
-                                Data[row+1][col-1][0] * Mx[2][0] +
-                                Data[row  ][col+1][0] * Mx[1][2] +
-                                Data[row+1][col+1][0] * Mx[2][2];
-                    
-                    // Ys need adjustment
-                    int yTot =  Data[row+1][col-1][0] * .25 +
-                                Data[row+1][col  ][0] * .5  +
-                                Data[row+1][col+1][0] * .25 -
-                                curr;
-
-                    if (T <= abs(xTot) || T <= abs(yTot))
-                        invertPixel(row, col);
+                    sum = Data[row-1][col+1][0] * Mx[0][2] +
+                          Data[row  ][col+1][0] * Mx[1][2] +
+                          Data[row+1][col+1][0] * Mx[2][2] -
+                          Data[row  ][col  ][0];
                 }
             }
-
-            // bottom l/r, edge
-            else if (row == Height-1) {
-                // left
-                if (col == 0) {
-                    int xTot =  Data[row-1][col+1][0] * 0.3 +
-                                Data[row  ][col+1][0] * 0.7 -
-                                curr;
-                    int yTot =  Data[row-1][col  ][0] * 0.7 +
-                                Data[row-1][col+1][0] * 0.3 -
-                                curr;
-
-                    if (T <= abs(xTot) || T <= abs(yTot))
-                        invertPixel(row, col);
+            // Right edge. Won't balance with typical masks.
+            else if (col == Width-1) {
+                // Top right corner
+                if (row == 0) {
+                    sum = Data[row  ][col-1][0] * Mx[1][0] +
+                          Data[row+1][col-1][0] * Mx[2][0] -
+                          Data[row  ][col  ][0];
                 }
-                
-                // right
-                else if (col == Width-1) {
-                    int xTot =  Data[row-1][col-1][0] * 0.3 +
-                                Data[row  ][col-1][0] * 0.7 -
-                                curr;
-                    int yTot =  Data[row-1][col-1][0] * 0.3 +
-                                Data[row  ][col-1][0] * 0.7 -
-                                curr;
-
-                    if (T <= abs(xTot) || T <= abs(yTot))
-                        invertPixel(row, col);
+                // Bottom right corner
+                else if (row == Height-1) {
+                    sum = Data[row-1][col-1][0] * Mx[0][0] +
+                          Data[row  ][col-1][0] * Mx[1][0] -
+                          Data[row  ][col  ][0];
                 }
-
-                // bottom edge
+                // Right edge
                 else {
-                    // Xs balance out
-                    int xTot =  Data[row-1][col-1][0] * Mx[0][0] +
-                                Data[row  ][col-1][0] * Mx[1][0] +
-                                Data[row-1][col+1][0] * Mx[1][2] +
-                                Data[row  ][col+1][0] * Mx[1][2];
-                    
-                    // Ys need adjustment
-                    int yTot =  Data[row-1][col-1][0] * .25 +
-                                Data[row-1][col  ][0] * .5  +
-                                Data[row-1][col+1][0] * .25 -
-                                curr;
-                    
-                    if (T <= abs(xTot) || T <= abs(yTot))
-                        invertPixel(row, col);
+                    sum = Data[row-1][col-1][0] * Mx[0][0] +
+                          Data[row  ][col-1][0] * Mx[1][0] +
+                          Data[row-1][col-1][0] * Mx[2][0] -
+                          Data[row  ][col  ][0];
                 }
             }
-
-            // left edge
-            else if (col == 0) {
-                // Xs need adjustment
-                int xTot =  Data[row-1][col+1][0] * .25 +
-                            Data[row  ][col+1][0] * .5  +
-                            Data[row+1][col+1][0] * .25 -
-                            curr;
-                
-                // Ys balance out
-                int yTot =  Data[row-1][col  ][0] * Mx[0][1] +
-                            Data[row-1][col+1][0] * Mx[0][2] +
-                            Data[row+1][col  ][0] * Mx[2][1] +
-                            Data[row+1][col+1][0] * Mx[2][2];
-
-                if (T <= abs(xTot) || T <= abs(yTot))
-                    invertPixel(row, col);
-            }
-
-            // right edge
-            else if (col == Width - 1) {
-                // Xs need adjustment
-                int xTot =  Data[row-1][col-1][0] * .25 +
-                            Data[row  ][col-1][0] * .5  +
-                            Data[row+1][col-1][0] * .25 -
-                            curr;
-                
-                // Ys balance out
-                int yTot =  Data[row-1][col-1][0] * Mx[0][0] +
-                            Data[row-1][col  ][0] * Mx[0][1] +
-                            Data[row+1][col-1][0] * Mx[2][0] +
-                            Data[row+1][col  ][0] * Mx[2][1];
-
-                if (T <= abs(xTot) || T <= abs(yTot))
-                    invertPixel(row, col);
-            }
-
-            // interior
+            // Interior columns
             else {
-                int xLeft =     Mx[0][0] * Data[row-1][col-1][0] +
-                                Mx[1][0] * Data[row  ][col-1][0] +
-                                Mx[2][0] * Data[row+1][col-1][0];
-                int xRight =    Mx[0][2] * Data[row-1][col+1][0] +
-                                Mx[1][2] * Data[row  ][col+1][0] +
-                                Mx[2][2] * Data[row+1][col+1][0];
-                int xTot = xLeft + xRight;
-
-                int yTop =      My[0][0] * Data[row-1][col-1][0] +
-                                My[0][1] * Data[row-1][col  ][0] +
-                                My[0][2] * Data[row-1][col+1][0];
-                int yBottom =   My[2][0] * Data[row+1][col-1][0] +
-                                My[2][1] * Data[row+1][col  ][0] +
-                                My[2][2] * Data[row+1][col+1][0];
-                int yTot = yTop + yBottom;
-
-                if (T <= xTot || T <= yTot) {
-                    Data[row][col][0] = 255 - Data[row][col][0];
+                // Middle top
+                if (row == 0) {
+                    sum = Data[row  ][col-1][0] * Mx[1][0] +
+                          Data[row+1][col-1][0] * Mx[2][0] -
+                          Data[row  ][col+1][0] * Mx[0][2] -
+                          Data[row+1][col+1][0] * Mx[0][2];
                 }
+                // Middle bottom
+                else if (row == Height-1) {
+                    sum = Data[row-1][col-1][0] * Mx[0][0] +
+                          Data[row  ][col-1][0] * Mx[1][0] -
+                          Data[row-1][col+1][0] * Mx[0][2] -
+                          Data[row  ][col+1][0] * Mx[0][2];
+                }
+                // middle middle
+                else {
+                    sum = Data[row-1][col-1][0] * Mx[0][0] +
+                          Data[row  ][col-1][0] * Mx[1][0] +
+                          Data[row+1][col-1][0] * Mx[2][0] -
+                          Data[row-1][col+1][0] * Mx[0][2] -
+                          Data[row  ][col+1][0] * Mx[0][2] -
+                          Data[row+1][col+1][0] * Mx[0][2];
+                }
+            }
+
+            // check if gradient sum is beyond tolerance
+            if (T < sum) {
+                invertPixel(row, col);
             }
         }
     }
 }
 
+void Image::sobelY(int T) {
+    const int My[3][3]= {{-1,-2,-1},
+                         { 0, 0, 0},
+                         { 1, 2, 1}};
+}
 
 // ============================== output ==============================
 void Image::showData() {
@@ -429,3 +378,6 @@ void Image::writeToFile() {
     fclose(file);
     cout << cProgram << cFile << "done." << endl;
 }
+
+
+// ============================= helpers ==============================

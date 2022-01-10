@@ -11,8 +11,8 @@
  * Operations can be performed on the Image to modify the pixel data.
  */
 class Image {
-    std::string cProgram = "[PROGRAM] - ";
-    std::string cFile = "[FILE] - ";
+    const std::string cProgram = "[PROGRAM] - ";
+    const std::string cFile = "[FILE] - ";
 
     const int FileHeaderSize = 14;
     const int InfoHeaderSize = 40;
@@ -37,10 +37,17 @@ public:
      * 
      * @param height the height of the Image in pixels
      * @param width the width of the Image in pixels
-     * @param filename optionally, choose a filename for the image. 'output.bmp' by default
+     * @param filename optionally, choose a filename for the image. 'output.bmp' by default.
      */
     Image(int height, int width, const char* filename=(char*)"output/output.bmp");
 
+    /**
+     * @brief Creates an Image object from provided input .bmp image.
+    * 
+    * @param filename the input file location. default is 'input/input.bmp'.
+    * @return Image
+    */
+    static Image getImageFromFile(const char* filename=(char*)"input/input.bmp");
 
     // ============================ operations ============================
     /**
@@ -58,14 +65,15 @@ public:
      * 
      * @param nrows the number of table rows desired. 
      * @param ncols the number of table columns desired.
+     * @param lineThickness the thickness of the gridlines in pixels. 1 by default.
      */
-    void toGrid(int nrows, int ncols);
+    void toGrid(int nrows, int ncols, int lineThickness=1);
 
     /**
      * @brief Generates an RGB gradient in the Image.Data.
      * NOTE Ensure Image.Data is in (R,G,B) form.
      */
-    void gradient();
+    void toGradient();
 
     /**
      * @brief Sets the pixel at Data[row][col] to the provided r, g, b values.
@@ -103,11 +111,25 @@ public:
     void normalize();
 
     /**
-     * @brief Determines Edges of an image using Sobel Edge detection. Requires grayscale image to work correctly.
+     * @brief Determines Edges of an image in X and Y directions using Sobel Edge masks. Requires grayscale image to work correctly.
      * 
      * @param T sets the threshold limit for edge detection. 225 by default.
      */
     void sobel(int T=225);
+
+    /**
+     * @brief Determines Edges of an image along the X direction using Sobel Edge masks. Requires grayscale image to work correctly.
+     * 
+     * @param T sets the threshold limit for edge detection. 225 by default.
+     */
+    void sobelX(int T=225);
+
+    /**
+     * @brief Determines Edges of an image along the Y direction using Sobel Edge masks. Requires grayscale image to work correctly.
+     * 
+     * @param T sets the threshold limit for edge detection. 225 by default.
+     */
+    void sobelY(int T=225);
 
 
     // ============================== output ==============================
@@ -123,5 +145,6 @@ public:
      */
     void writeToFile();
 };
+
 
 #endif
