@@ -34,21 +34,67 @@ Image::Image(int height, int width, const char* filename) {
 }
 
 Image Image::getImageFromFile(const char* filename) {
+    cout << "[PROGRAM] - [FILE] - reading BMP file from '" << filename << "'..." << endl;
+
+    // read file into ifstream 'File'
     ifstream File(filename);
 
-    if (File.is_open()) {
-        char line;
-        while (File >> line) {
-            cout << line << endl;
+    // ensure file opens properly
+    if (!File.is_open()) {
+        cerr << "[ERROR] - encountered error opening the file at '" << filename << "'" << endl;
+        throw runtime_error("[ERROR] - getImageFromFile() error");
+    }
+
+    // read file data into string dataIn
+    string dataIn;
+    // read each new character as unsigned char
+    unsigned char lineIn;
+    while(!File.eof()) {
+        File >> lineIn;
+        dataIn.push_back((unsigned char) lineIn);
+    }
+    File.close();
+
+    // ensure file is bitmap type
+    if (dataIn[0] != 'B' || dataIn[1] != 'M') {
+        cerr << "[ERROR] - file is not of bitmap type ('BM'-prefix missing)." << endl;
+        throw runtime_error("[ERROR] - getImageFromFile() error");
+    }
+
+
+    // trouble reading
+    // see ab fopen() &
+    //  using structs to fread https://stackoverflow.com/questions/14279242/read-bitmap-file-into-structure ...
+    cout << dataIn.length() << ": " << dataIn << endl;
+    int fileSize = 0;
+    for (int i = 2; i < 6; i++) {
+        cout << dataIn[i] << " ";
+        fileSize += (int) dataIn[i];
+    }
+    cout << endl << fileSize << endl;
+
+
+    // create an image of the Height x Width size and load it with the pixel data
+    const char* newFilename = "newfile";
+    int height = (int) 'h';
+    int width = (int) 'w';
+    int bytesPerPixel = (int) 'b';
+
+    Image I = Image(height, width, newFilename);
+
+    // parse dataIn to find rgb data
+    for (int row = 0; row < height; row++) {
+        for (int col = 0; col < width; col++) {
+            int pixelLoc = offset + row*rowWidth + col;
+            int r = (int) pixelLoc;
+            int g = (int) pixelLoc+1;
+            int b = (int) pixelLoc+2;
+
+            I.setPixel(row, col, r, g, b);
         }
-
-        File.close();
-    }
-    else {
-        cerr << "[ERROR] - Encountered error reading the file at '" << filename << "'" << endl;
     }
 
-    return Image();
+    return I;
 }
 
 // ============================ operations ============================
@@ -378,6 +424,3 @@ void Image::writeToFile() {
     fclose(file);
     cout << cProgram << cFile << "done." << endl;
 }
-
-
-// ============================= helpers ==============================
